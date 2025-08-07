@@ -30,13 +30,13 @@ git clone https://github.com/divyagoyal138/cribhub.git
 cd cribhub
 npm install
 npm run dev
-<<<<<<< HEAD
 
 ```
 
 ## after the project execution
 
 press CRTL+B for the side bar to move
-=======
+
 ```
->>>>>>> 93e9f19f5acf54ba0cadfee445fa2724c3bbb827
+
+```
