@@ -3,52 +3,7 @@
 import type React from "react"
 
 import { useState, useMemo } from "react"
-import {
-  Search,
-  Grid3X3,
-  List,
-  Star,
-  Plus,
-  Eye,
-  Settings,
-  Download,
-  Trash2,
-  Edit,
-  TrendingUp,
-  Tag,
-  Heart,
-  Share2,
-  LayoutGrid,
-  Rows,
-  CalendarIcon,
-  Kanban,
-  Home,
-  DollarSign,
-  Users,
-  CheckCircle,
-  BedSingle,
-  CalendarDays,
-  MessageSquare,
-  Phone,
-  Linkedin,
-  Instagram,
-  BookOpen,
-  Gamepad2,
-  MountainIcon as Hiking,
-  Utensils,
-  Film,
-  Palette,
-  Dumbbell,
-  Coffee,
-  Moon,
-  Sun,
-  PawPrint,
-  CigaretteIcon as Smoking,
-  Volume2,
-  Sparkles,
-  ShieldCheck,
-  Globe,
-} from "lucide-react"
+import { Search, Grid3X3, List, Star, Plus, Eye, Settings, Download, Trash2, Edit, TrendingUp, Tag, Heart, Share2, LayoutGrid, Rows, CalendarIcon, Kanban, Home, DollarSign, Users, CheckCircle, BedSingle, CalendarDays, MessageSquare, Phone, Linkedin, Instagram, BookOpen, Gamepad2, MountainIcon as Hiking, Utensils, Film, Palette, Dumbbell, Coffee, Moon, Sun, PawPrint, CigaretteIcon as Smoking, Volume2, Sparkles, ShieldCheck, Globe, BarChart } from 'lucide-react'
 import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
@@ -84,6 +39,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { AnalyticsContent } from "@/components/analytics-content" // Import the new AnalyticsContent
 
 // Mock data for roommates
 const initialRoommates = [
@@ -905,7 +861,7 @@ function RoommateCard({
   )
 }
 
-function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard }: any) {
+function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectAnalytics }: any) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -914,8 +870,8 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard }: any) {
             <Home className="h-4 w-4 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="font-semibold">RoommateFinder</h2>
-            <p className="text-xs text-muted-foreground">Find your perfect match</p>
+            <h2 className="font-semibold">CribHub</h2>
+            <p className="text-xs text-white">Find your perfect match</p>
           </div>
         </div>
       </SidebarHeader>
@@ -943,6 +899,12 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard }: any) {
                   <Badge variant="secondary" className="ml-auto">
                     {roommates.filter((r: any) => r.isFavorite).length}
                   </Badge>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={onSelectAnalytics}>
+                  <BarChart className="h-4 w-4" />
+                  <span>Analytics</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -993,16 +955,16 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard }: any) {
         <div className="p-2 space-y-2">
           <div className="text-xs text-muted-foreground">
             <div className="flex justify-between">
-              <span>Total Listings</span>
-              <span>{roommates.length}</span>
+              <span className="text-white">Total Listings</span>
+              <span className="text-white">{roommates.length}</span>
             </div>
             <div className="flex justify-between">
-              <span>New This Month</span>
-              <span>+3</span>
+              <span className="text-white">New This Month</span>
+              <span className="text-white">+3</span>
             </div>
             <div className="flex justify-between">
-              <span>Avg. Compatibility</span>
-              <span>
+              <span className="text-white">Avg. Compatibility</span>
+              <span className="text-white">
                 {(roommates.reduce((sum: number, r: any) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(
                   0,
                 )}
@@ -1016,8 +978,413 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard }: any) {
   )
 }
 
+// New component for the Dashboard content
+function DashboardContent({
+  roommates,
+  searchQuery,
+  setSearchQuery,
+  selectedAccommodationType,
+  setSelectedAccommodationType,
+  selectedRentRange,
+  setSelectedRentRange,
+  selectedVerificationStatus,
+  setSelectedVerificationStatus,
+  selectedGender,
+  setSelectedGender,
+  sortBy,
+  setSortBy,
+  viewMode,
+  setViewMode,
+  selectedRoommates,
+  handleSelectRoommate,
+  handleSelectAll,
+  handleBulkDelete,
+  handleEdit,
+  handleDelete,
+  handleViewDetails,
+  handleToggleFavorite,
+  isAddDialogOpen,
+  setIsAddDialogOpen,
+  newListing,
+  handleInputChange,
+  handleSelectChange,
+  handleAddListing,
+  filteredRoommates,
+  renderRoommates,
+  isDetailModalOpen,
+  selectedRoommate,
+  setIsDetailModalOpen,
+}: any) {
+  return (
+    <>
+      {/* Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-16 items-center px-6">
+          <SidebarTrigger />
+          <div className="flex items-center space-x-4 flex-1 ml-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search roommates, locations, interests..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Select value={selectedAccommodationType} onValueChange={setSelectedAccommodationType}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by type" /> {/* Added placeholder */}
+                </SelectTrigger>
+                <SelectContent>
+                  {accommodationTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedRentRange} onValueChange={setSelectedRentRange}>
+                <SelectTrigger className="w-36">
+                  <SelectValue placeholder="Filter by rent" /> {/* Added placeholder */}
+                </SelectTrigger>
+                <SelectContent>
+                  {rentRanges.map((range) => (
+                    <SelectItem key={range} value={range}>
+                      {range}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedGender} onValueChange={setSelectedGender}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Filter by gender" /> {/* Added placeholder */}
+                </SelectTrigger>
+                <SelectContent>
+                  {genders.map((gender) => (
+                    <SelectItem key={gender} value={gender}>
+                      {gender}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={selectedVerificationStatus} onValueChange={setSelectedVerificationStatus}>
+                <SelectTrigger className="w-36">
+                  <SelectValue placeholder="Filter by status" /> {/* Added placeholder */}
+                </SelectTrigger>
+                <SelectContent>
+                  {verificationStatuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Sort results" /> {/* Added placeholder */}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="compatibilityScore">Compatibility</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
+                  <SelectItem value="price">Price (Low to High)</SelectItem>
+                  <SelectItem value="name">Name (A-Z)</SelectItem>
+                  <SelectItem value="availability">Availability</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center border rounded-lg">
+              {viewModes.map((mode) => {
+                const Icon = mode.icon
+                return (
+                  <Button
+                    key={mode.id}
+                    variant={viewMode === mode.id ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode(mode.id)}
+                    title={mode.label}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Button>
+                )
+              })}
+            </div>
+           <Button variant="outline">Login</Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Listing
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Roommate Listing</DialogTitle>
+                  <DialogDescription>List yourself or a room to find a match.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Name</Label>
+                    <Input id="name" value={newListing.name} onChange={handleInputChange} placeholder="Your Name" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="age">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={newListing.age}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 25"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="gender">Gender</Label>
+                      <Select value={newListing.gender} onValueChange={(val) => handleSelectChange("gender", val)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {genders.slice(1).map((gender) => (
+                            <SelectItem key={gender} value={gender}>
+                              {gender}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input
+                      id="occupation"
+                      value={newListing.occupation}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Software Engineer"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      value={newListing.location}
+                      onChange={handleInputChange}
+                      placeholder="e.g., San Francisco, CA"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="accommodationType">Accommodation Type</Label>
+                      <Select
+                        value={newListing.accommodationType}
+                        onValueChange={(val) => handleSelectChange("accommodationType", val)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accommodationTypes.slice(1).map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="roomType">Room Type</Label>
+                      <Select
+                        value={newListing.roomType}
+                        onValueChange={(val) => handleSelectChange("roomType", val)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Room Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Private Room">Private Room</SelectItem>
+                          <SelectItem value="Shared Room">Shared Room</SelectItem>
+                          <SelectItem value="Entire Place">Entire Place</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="rent">Rent ($/month)</Label>
+                    <Input
+                      id="rent"
+                      type="number"
+                      value={newListing.rent}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 1200"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="availability">Availability Date</Label>
+                    <Input
+                      id="availability"
+                      type="date"
+                      value={newListing.availability}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={newListing.bio}
+                      onChange={handleInputChange}
+                      placeholder="Tell us about yourself and what you're looking for..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="interests">Interests (comma-separated)</Label>
+                    <Input
+                      id="interests"
+                      value={newListing.interests}
+                      onChange={handleInputChange}
+                      placeholder="e.g., hiking, cooking, gaming"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddListing}>Add Listing</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        {/* Stats Bar */}
+        <div className="mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary">Total Listings</p>
+                    <p className="text-2xl font-bold text-primary">{roommates.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <div className="h-8 w-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary">New This Month</p>
+                    <p className="text-2xl font-bold text-primary">+3</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <div className="h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary">Avg. Compatibility</p>
+                    <p className="text-2xl font-bold text-primary">
+                      {(roommates.reduce((sum, r) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <div className="h-8 w-8 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+                    <Star className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-primary">Favorites</p>
+                    <p className="text-2xl font-bold text-primary">{roommates.filter((r) => r.isFavorite).length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
+        {selectedRoommates.length > 0 && (
+          <div className="mb-4 p-4 bg-muted rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={selectedRoommates.length === filteredRoommates.length}
+                  onCheckedChange={handleSelectAll}
+                />
+                <span className="text-sm font-medium">
+                  {selectedRoommates.length} of {filteredRoommates.length} selected
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleBulkDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Roommates Display */}
+        {renderRoommates()}
+
+        {filteredRoommates.length === 0 && (
+          <div className="text-center py-12">
+            <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No roommates found</h3>
+            <p className="text-muted-foreground mb-4">
+              Try adjusting your search criteria or add a new roommate listing.
+            </p>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Listing
+            </Button>
+          </div>
+        )}
+      </main>
+
+      {/* Detailed Roommate Modal */}
+      <DetailedRoommateModal
+        roommate={selectedRoommate}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false)
+          setSelectedRoommate(null)
+        }}
+      />
+    </>
+  )
+}
+
+
 export default function HomePage() {
-  const [roommates, setRoommates] = useState(initialRoommates) // Use useState for dynamic data
+  const [roommates, setRoommates] = useState(initialRoommates)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedAccommodationType, setSelectedAccommodationType] = useState("All")
   const [selectedRentRange, setSelectedRentRange] = useState("All")
@@ -1029,7 +1396,8 @@ export default function HomePage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedRoommate, setSelectedRoommate] = useState<any>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false) // New state for favorites filter
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [currentPage, setCurrentPage] = useState("dashboard") // New state for current page
 
   // Form states for Add Listing
   const [newListing, setNewListing] = useState({
@@ -1161,14 +1529,14 @@ export default function HomePage() {
       }
     })
   }, [
-    roommates, // Added roommates to dependency array
+    roommates,
     searchQuery,
     selectedAccommodationType,
     selectedRentRange,
     selectedVerificationStatus,
     selectedGender,
     sortBy,
-    showFavoritesOnly, // Added showFavoritesOnly to dependency array
+    showFavoritesOnly,
   ])
 
   const handleSelectRoommate = (roommateId: number, checked: boolean) => {
@@ -1297,372 +1665,61 @@ export default function HomePage() {
       <div className="flex min-h-screen w-full">
         <AppSidebar
           roommates={roommates}
-          onSelectFavorites={() => setShowFavoritesOnly(true)}
-          onSelectDashboard={() => setShowFavoritesOnly(false)}
+          onSelectFavorites={() => {
+            setShowFavoritesOnly(true)
+            setCurrentPage("dashboard") // Stay on dashboard view but filter favorites
+          }}
+          onSelectDashboard={() => {
+            setShowFavoritesOnly(false)
+            setCurrentPage("dashboard")
+          }}
+          onSelectAnalytics={() => setCurrentPage("analytics")} // Set current page to analytics
         />
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-16 items-center px-6">
-              <SidebarTrigger />
-              <div className="flex items-center space-x-4 flex-1 ml-4">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search roommates, locations, interests..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Select value={selectedAccommodationType} onValueChange={setSelectedAccommodationType}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Accommodation Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accommodationTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedRentRange} onValueChange={setSelectedRentRange}>
-                    <SelectTrigger className="w-36">
-                      <SelectValue placeholder="Rent Range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rentRanges.map((range) => (
-                        <SelectItem key={range} value={range}>
-                          {range}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedGender} onValueChange={setSelectedGender}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {genders.map((gender) => (
-                        <SelectItem key={gender} value={gender}>
-                          {gender}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedVerificationStatus} onValueChange={setSelectedVerificationStatus}>
-                    <SelectTrigger className="w-36">
-                      <SelectValue placeholder="Verification" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {verificationStatuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Sort By" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="compatibilityScore">Compatibility</SelectItem>
-                      <SelectItem value="rating">Rating</SelectItem>
-                      <SelectItem value="price">Price (Low to High)</SelectItem>
-                      <SelectItem value="name">Name (A-Z)</SelectItem>
-                      <SelectItem value="availability">Availability</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center border rounded-lg">
-                  {viewModes.map((mode) => {
-                    const Icon = mode.icon
-                    return (
-                      <Button
-                        key={mode.id}
-                        variant={viewMode === mode.id ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setViewMode(mode.id)}
-                        title={mode.label}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </Button>
-                    )
-                  })}
-                </div>
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Listing
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Add New Roommate Listing</DialogTitle>
-                      <DialogDescription>List yourself or a room to find a match.</DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={newListing.name} onChange={handleInputChange} placeholder="Your Name" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="age">Age</Label>
-                          <Input
-                            id="age"
-                            type="number"
-                            value={newListing.age}
-                            onChange={handleInputChange}
-                            placeholder="e.g., 25"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="gender">Gender</Label>
-                          <Select value={newListing.gender} onValueChange={(val) => handleSelectChange("gender", val)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Gender" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {genders.slice(1).map((gender) => (
-                                <SelectItem key={gender} value={gender}>
-                                  {gender}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="occupation">Occupation</Label>
-                        <Input
-                          id="occupation"
-                          value={newListing.occupation}
-                          onChange={handleInputChange}
-                          placeholder="e.g., Software Engineer"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="location">Location</Label>
-                        <Input
-                          id="location"
-                          value={newListing.location}
-                          onChange={handleInputChange}
-                          placeholder="e.g., San Francisco, CA"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="accommodationType">Accommodation Type</Label>
-                          <Select
-                            value={newListing.accommodationType}
-                            onValueChange={(val) => handleSelectChange("accommodationType", val)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {accommodationTypes.slice(1).map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label htmlFor="roomType">Room Type</Label>
-                          <Select
-                            value={newListing.roomType}
-                            onValueChange={(val) => handleSelectChange("roomType", val)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Room Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Private Room">Private Room</SelectItem>
-                              <SelectItem value="Shared Room">Shared Room</SelectItem>
-                              <SelectItem value="Entire Place">Entire Place</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="rent">Rent ($/month)</Label>
-                        <Input
-                          id="rent"
-                          type="number"
-                          value={newListing.rent}
-                          onChange={handleInputChange}
-                          placeholder="e.g., 1200"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="availability">Availability Date</Label>
-                        <Input
-                          id="availability"
-                          type="date"
-                          value={newListing.availability}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="bio">Bio</Label>
-                        <Textarea
-                          id="bio"
-                          value={newListing.bio}
-                          onChange={handleInputChange}
-                          placeholder="Tell us about yourself and what you're looking for..."
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="interests">Interests (comma-separated)</Label>
-                        <Input
-                          id="interests"
-                          value={newListing.interests}
-                          onChange={handleInputChange}
-                          placeholder="e.g., hiking, cooking, gaming"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleAddListing}>Add Listing</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <main className="flex-1 p-6">
-            {/* Stats Bar */}
-            <div className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                        <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Total Listings</p>
-                        <p className="text-2xl font-bold">{roommates.length}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-8 w-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">New This Month</p>
-                        <p className="text-2xl font-bold">+3</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-8 w-8 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                        <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Avg. Compatibility</p>
-                        <p className="text-2xl font-bold">
-                          {(roommates.reduce((sum, r) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(0)}%
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="h-8 w-8 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-                        <Star className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Favorites</p>
-                        <p className="text-2xl font-bold">{roommates.filter((r) => r.isFavorite).length}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Bulk Actions */}
-            {selectedRoommates.length > 0 && (
-              <div className="mb-4 p-4 bg-muted rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={selectedRoommates.length === filteredRoommates.length}
-                      onCheckedChange={handleSelectAll}
-                    />
-                    <span className="text-sm font-medium">
-                      {selectedRoommates.length} of {filteredRoommates.length} selected
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleBulkDelete}>
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Roommates Display */}
-            {renderRoommates()}
-
-            {filteredRoommates.length === 0 && (
-              <div className="text-center py-12">
-                <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-12 w-12 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No roommates found</h3>
-                <p className="text-muted-foreground mb-4">
-                  Try adjusting your search criteria or add a new roommate listing.
-                </p>
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Your First Listing
-                </Button>
-              </div>
-            )}
-          </main>
+          {currentPage === "dashboard" ? (
+            <DashboardContent
+              roommates={roommates}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedAccommodationType={selectedAccommodationType}
+              setSelectedAccommodationType={setSelectedAccommodationType}
+              selectedRentRange={selectedRentRange}
+              setSelectedRentRange={setSelectedRentRange}
+              selectedVerificationStatus={selectedVerificationStatus}
+              setSelectedVerificationStatus={setSelectedVerificationStatus}
+              selectedGender={selectedGender}
+              setSelectedGender={setSelectedGender}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              selectedRoommates={selectedRoommates}
+              handleSelectRoommate={handleSelectRoommate}
+              handleSelectAll={handleSelectAll}
+              handleBulkDelete={handleBulkDelete}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              handleViewDetails={handleViewDetails}
+              handleToggleFavorite={handleToggleFavorite}
+              isAddDialogOpen={isAddDialogOpen}
+              setIsAddDialogOpen={setIsAddDialogOpen}
+              newListing={newListing}
+              handleInputChange={handleInputChange}
+              handleSelectChange={handleSelectChange}
+              handleAddListing={handleAddListing}
+              filteredRoommates={filteredRoommates}
+              renderRoommates={renderRoommates}
+              isDetailModalOpen={isDetailModalOpen}
+              selectedRoommate={selectedRoommate}
+              setIsDetailModalOpen={setIsDetailModalOpen}
+            />
+          ) : (
+            <main className="flex-1 p-6">
+              <AnalyticsContent />
+            </main>
+          )}
         </div>
       </div>
-
-      {/* Detailed Roommate Modal */}
-      <DetailedRoommateModal
-        roommate={selectedRoommate}
-        isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false)
-          setSelectedRoommate(null)
-        }}
-      />
     </SidebarProvider>
   )
 }
