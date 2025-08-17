@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useMemo } from "react"
 import { Search, Grid3X3, List, Star, Plus, Eye, Settings, Download, Trash2, Edit, TrendingUp, Tag, Heart, Share2, LayoutGrid, Rows, CalendarIcon, Kanban, Home, DollarSign, Users, CheckCircle, BedSingle, CalendarDays, MessageSquare, Phone, Linkedin, Instagram, BookOpen, Gamepad2, MountainIcon as Hiking, Utensils, Film, Palette, Dumbbell, Coffee, Moon, Sun, PawPrint, CigaretteIcon as Smoking, Volume2, Sparkles, ShieldCheck, Globe, BarChart } from 'lucide-react'
 import Image from "next/image"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,20 +40,21 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { AnalyticsContent } from "@/components/analytics-content" // Import the new AnalyticsContent
+import { useSession, signIn, signOut } from "next-auth/react" // Add this import
 
 // Mock data for roommates
 const initialRoommates = [
   {
     id: 1,
-    name: "Prit shelar",
+    name: "Alice Johnson",
     age: 24,
     gender: "Female",
     occupation: "Software Engineer",
-    location: "Thane, Mumbai",
+    location: "San Francisco, CA",
     accommodationType: "Apartment",
     roomType: "Private Room",
     rent: 1200,
-    availability: "08/08/2025",
+    availability: "2024-03-01",
     lifestyle: {
       cleanliness: "Very Clean",
       socialHabits: "Moderately Social",
@@ -63,8 +65,8 @@ const initialRoommates = [
     compatibilityScore: 92,
     isVerified: true,
     rating: 4.8,
-    profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSchAyiN-XitRRDoZ0KUwxcD9ZRHFhO4kjE0mm5mo_HIYvWB8qtHIyVLqDSIQLgIdSZN8pF7QsifcHSuiOQ8-uDUkIasa4l1TbWKwzPfEcOmQ",
-    photos: ["/ap1.jpg", "/ap2.jpg"],
+    profilePicture: "/placeholder.svg?height=64&width=64",
+    photos: ["/placeholder.svg?height=200&width=300", "/placeholder.svg?height=200&width=300"],
     bio: "I'm a software engineer looking for a quiet and clean place. I enjoy coding, hiking, and occasional board game nights. I respect personal space but also enjoy a good chat.",
     dateJoined: "2023-10-01",
     lastActive: "2024-01-20",
@@ -81,9 +83,9 @@ const initialRoommates = [
   },
   {
     id: 2,
-    name: "Divya Goyal",
-    age: 19,
-    gender: "Female",
+    name: "Bob Smith",
+    age: 28,
+    gender: "Male",
     occupation: "Graphic Designer",
     location: "New York, NY",
     accommodationType: "Studio",
@@ -100,8 +102,8 @@ const initialRoommates = [
     compatibilityScore: 85,
     isVerified: true,
     rating: 4.5,
-    profilePicture: "https://i.pinimg.com/originals/4a/e6/3a/4ae63ab4ea2664f173ea35c28a9bdf55.jpg",
-    photos: ["/ap2.jpg", "/ap4.jpg"],
+    profilePicture: "/placeholder.svg?height=64&width=64",
+    photos: ["/placeholder.svg?height=200&width=300", "/placeholder.svg?height=200&width=300"],
     bio: "Creative designer seeking a vibrant neighborhood. I love exploring new cafes, art galleries, and have a friendly golden retriever. Looking for someone who appreciates a lively home.",
     dateJoined: "2023-09-10",
     lastActive: "2024-01-19",
@@ -118,7 +120,7 @@ const initialRoommates = [
   },
   {
     id: 3,
-    name: "Sunita jena",
+    name: "Charlie Brown",
     age: 22,
     gender: "Non-binary",
     occupation: "Student",
@@ -137,8 +139,8 @@ const initialRoommates = [
     compatibilityScore: 78,
     isVerified: false,
     rating: 3.9,
-    profilePicture: "https://c.ndtvimg.com/2024-11/cdhtf27_as_625x300_12_November_24.jpg?im=FaceCrop,algorithm=dnn,width=545,height=307",
-    photos: ["/ap4.jpg", "/ap3.jpg"],
+    profilePicture: "/placeholder.svg?height=64&width=64",
+    photos: ["/placeholder.svg?height=200&width=300", "/placeholder.svg?height=200&width=300"],
     bio: "University student focused on studies. I'm generally quiet but open to making new friends. Looking for a budget-friendly place near campus.",
     dateJoined: "2023-11-05",
     lastActive: "2024-01-18",
@@ -153,7 +155,7 @@ const initialRoommates = [
   },
   {
     id: 4,
-    name: "samikhsha power",
+    name: "Diana Prince",
     age: 30,
     gender: "Female",
     occupation: "Marketing Manager",
@@ -172,8 +174,8 @@ const initialRoommates = [
     compatibilityScore: 88,
     isVerified: true,
     rating: 4.7,
-    profilePicture: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKwB61H_0GYkPHfGd8EypnRw_fS2koSQADww&s",
-    photos: ["/ap3.jpg", "/ap1.jpg"],
+    profilePicture: "/placeholder.svg?height=64&width=64",
+    photos: ["/placeholder.svg?height=200&width=300", "/placeholder.svg?height=200&width=300"],
     bio: "Experienced marketing professional seeking a comfortable home. I enjoy fitness, healthy cooking, and occasional social gatherings. I have a very friendly cat.",
     dateJoined: "2023-08-20",
     lastActive: "2024-01-21",
@@ -1014,6 +1016,8 @@ function DashboardContent({
   selectedRoommate,
   setIsDetailModalOpen,
 }: any) {
+  const { data: session, status } = useSession() // Add this line
+
   return (
     <>
       {/* Header */}
@@ -1033,7 +1037,7 @@ function DashboardContent({
             <div className="flex items-center space-x-2">
               <Select value={selectedAccommodationType} onValueChange={setSelectedAccommodationType}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by type" /> {/* Added placeholder */}
+                  <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
                   {accommodationTypes.map((type) => (
@@ -1045,7 +1049,7 @@ function DashboardContent({
               </Select>
               <Select value={selectedRentRange} onValueChange={setSelectedRentRange}>
                 <SelectTrigger className="w-36">
-                  <SelectValue placeholder="Filter by rent" /> {/* Added placeholder */}
+                  <SelectValue placeholder="Filter by rent" />
                 </SelectTrigger>
                 <SelectContent>
                   {rentRanges.map((range) => (
@@ -1057,7 +1061,7 @@ function DashboardContent({
               </Select>
               <Select value={selectedGender} onValueChange={setSelectedGender}>
                 <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Filter by gender" /> {/* Added placeholder */}
+                  <SelectValue placeholder="Filter by gender" />
                 </SelectTrigger>
                 <SelectContent>
                   {genders.map((gender) => (
@@ -1069,7 +1073,7 @@ function DashboardContent({
               </Select>
               <Select value={selectedVerificationStatus} onValueChange={setSelectedVerificationStatus}>
                 <SelectTrigger className="w-36">
-                  <SelectValue placeholder="Filter by status" /> {/* Added placeholder */}
+                  <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   {verificationStatuses.map((status) => (
@@ -1081,7 +1085,7 @@ function DashboardContent({
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Sort results" /> {/* Added placeholder */}
+                  <SelectValue placeholder="Sort results" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="compatibilityScore">Compatibility</SelectItem>
@@ -1380,6 +1384,7 @@ function DashboardContent({
     </>
   )
 }
+
 
 export default function HomePage() {
   const [roommates, setRoommates] = useState(initialRoommates)
