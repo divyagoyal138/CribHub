@@ -2,9 +2,12 @@
 
 import type React from "react"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
+import { db } from "@/lib/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { Search, Grid3X3, List, Star, Plus, Eye, Settings, Download, Trash2, Edit, TrendingUp, Tag, Heart, Share2, LayoutGrid, Rows, CalendarIcon, Kanban, Home, DollarSign, Users, CheckCircle, BedSingle, CalendarDays, MessageSquare, Phone, Linkedin, Instagram, BookOpen, Gamepad2, MountainIcon as Hiking, Utensils, Film, Palette, Dumbbell, Coffee, Moon, Sun, PawPrint, CigaretteIcon as Smoking, Volume2, Sparkles, ShieldCheck, Globe, BarChart } from 'lucide-react'
 import Image from "next/image"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +16,9 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+// Removed Convex useQuery and api imports
+
 import {
   Dialog,
   DialogContent,
@@ -38,9 +44,10 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  SidebarInset,
 } from "@/components/ui/sidebar"
 import { AnalyticsContent } from "@/components/analytics-content" // Import the new AnalyticsContent
-import { useSession, signIn, signOut } from "next-auth/react" // Add this import
+
 
 // Mock data for roommates
 const initialRoommates = [
@@ -198,6 +205,12 @@ const initialRoommates = [
 ]
 
 const accommodationTypes = ["All", "Apartment", "House", "Studio", "Shared Room"]
+const defaultPhotos = ["/ap1.jpg", "/ap2.jpg", "/ap3.jpg", "/ap4.jpg"]
+const getDefaultPhotoForId = (id: number) => defaultPhotos[Math.abs(id) % defaultPhotos.length]
+const normalizePhoto = (roommate: any, src?: string) => {
+  if (!src || src.includes("placeholder.svg")) return getDefaultPhotoForId(Number(roommate?.id ?? 0))
+  return src
+}
 const rentRanges = ["All", "$500-1000", "$1000-1500", "$1500-2000", "$2000+"]
 const verificationStatuses = ["All", "Verified", "Unverified"]
 const genders = ["All", "Male", "Female", "Non-binary"]
@@ -259,7 +272,7 @@ function DetailedRoommateModal({ roommate, isOpen, onClose }: any) {
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={roommate.profilePicture || "/placeholder.svg"} alt={roommate.name} />
+                <AvatarImage src={normalizePhoto(roommate, roommate.profilePicture)} alt={roommate.name} />
                 <AvatarFallback>{roommate.name[0]}</AvatarFallback>
               </Avatar>
               <div>
@@ -309,7 +322,7 @@ function DetailedRoommateModal({ roommate, isOpen, onClose }: any) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Image
-                  src={roommate.photos[0] || "/placeholder.svg"}
+                  src={normalizePhoto(roommate, roommate.photos[0])}
                   alt={`${roommate.name}'s accommodation`}
                   width={400}
                   height={300}
@@ -319,7 +332,7 @@ function DetailedRoommateModal({ roommate, isOpen, onClose }: any) {
                   {roommate.photos.slice(1, 3).map((photo: string, index: number) => (
                     <Image
                       key={index}
-                      src={photo || "/placeholder.svg"}
+                      src={normalizePhoto(roommate, photo)}
                       alt={`Roommate photo ${index + 2}`}
                       width={200}
                       height={150}
@@ -385,7 +398,7 @@ function DetailedRoommateModal({ roommate, isOpen, onClose }: any) {
                         <Icon className="h-5 w-5 text-primary" />
                         <span className="font-medium capitalize">{key.replace(/([A-Z])/g, " $1")}</span>
                       </div>
-                      <Badge variant="outline">{value}</Badge>
+                      <Badge variant="outline">{String(value)}</Badge>
                     </div>
                   )
                 })}
@@ -562,7 +575,7 @@ function RoommateCard({
           <div className="flex items-center space-x-4">
             <Checkbox checked={isSelected} onCheckedChange={onSelect} />
             <Avatar className="h-12 w-12">
-              <AvatarImage src={roommate.profilePicture || "/placeholder.svg"} alt={roommate.name} />
+              <AvatarImage src={normalizePhoto(roommate, roommate.profilePicture)} alt={roommate.name} />
               <AvatarFallback>{roommate.name[0]}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -622,7 +635,7 @@ function RoommateCard({
           <div className="flex items-center space-x-3">
             <Checkbox checked={isSelected} onCheckedChange={onSelect} />
             <Avatar className="h-8 w-8">
-              <AvatarImage src={roommate.profilePicture || "/placeholder.svg"} alt={roommate.name} />
+              <AvatarImage src={normalizePhoto(roommate, roommate.profilePicture)} alt={roommate.name} />
               <AvatarFallback className="text-xs">{roommate.name[0]}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -670,7 +683,7 @@ function RoommateCard({
             <div className="flex items-center space-x-2">
               <Checkbox checked={isSelected} onCheckedChange={onSelect} />
               <Avatar className="h-8 w-8">
-                <AvatarImage src={roommate.profilePicture || "/placeholder.svg"} alt={roommate.name} />
+                <AvatarImage src={normalizePhoto(roommate, roommate.profilePicture)} alt={roommate.name} />
                 <AvatarFallback className="text-xs">{roommate.name[0]}</AvatarFallback>
               </Avatar>
             </div>
@@ -729,7 +742,7 @@ function RoommateCard({
               <div className="flex items-center space-x-2">
                 <Checkbox checked={isSelected} onCheckedChange={onSelect} />
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={roommate.profilePicture || "/placeholder.svg"} alt={roommate.name} />
+                  <AvatarImage src={normalizePhoto(roommate, roommate.profilePicture)} alt={roommate.name} />
                   <AvatarFallback>{roommate.name[0]}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -825,7 +838,7 @@ function RoommateCard({
       <CardContent>
         <div className="space-y-3">
           <Image
-            src={roommate.photos[0] || "/placeholder.svg"}
+            src={normalizePhoto(roommate, roommate.photos[0])}
             alt={`${roommate.name}'s accommodation`}
             width={300}
             height={200}
@@ -1015,9 +1028,8 @@ function DashboardContent({
   isDetailModalOpen,
   selectedRoommate,
   setIsDetailModalOpen,
+  setSelectedRoommate,
 }: any) {
-  const { data: session, status } = useSession() // Add this line
-
   return (
     <>
       {/* Header */}
@@ -1114,7 +1126,7 @@ function DashboardContent({
                 )
               })}
             </div>
-           <Button variant="outline">Login</Button>
+           <Link href="/login"><Button variant="outline">Login</Button></Link>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -1303,7 +1315,7 @@ function DashboardContent({
                   <div>
                     <p className="text-sm font-medium text-primary">Avg. Compatibility</p>
                     <p className="text-2xl font-bold text-primary">
-                      {(roommates.reduce((sum, r) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(0)}%
+                      {(roommates.reduce((sum: number, r: any) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(0)}%
                     </p>
                   </div>
                 </div>
@@ -1317,7 +1329,7 @@ function DashboardContent({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-primary">Favorites</p>
-                    <p className="text-2xl font-bold text-primary">{roommates.filter((r) => r.isFavorite).length}</p>
+                    <p className="text-2xl font-bold text-primary">{roommates.filter((r: any) => r.isFavorite).length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1387,6 +1399,7 @@ function DashboardContent({
 
 
 export default function HomePage() {
+  
   const [roommates, setRoommates] = useState(initialRoommates)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedAccommodationType, setSelectedAccommodationType] = useState("All")
@@ -1401,6 +1414,32 @@ export default function HomePage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState("dashboard") // New state for current page
+
+  // Load roommates from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = typeof window !== 'undefined' ? window.localStorage.getItem('cribhub_roommates') : null
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          setRoommates(parsed)
+        }
+      }
+    } catch (e) {
+      console.error('Failed to read roommates from localStorage', e)
+    }
+  }, [])
+
+  // Persist roommates to localStorage whenever they change
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('cribhub_roommates', JSON.stringify(roommates))
+      }
+    } catch (e) {
+      console.error('Failed to save roommates to localStorage', e)
+    }
+  }, [roommates])
 
   // Form states for Add Listing
   const [newListing, setNewListing] = useState({
@@ -1426,7 +1465,11 @@ export default function HomePage() {
     setNewListing((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleAddListing = () => {
+  const handleAddListing = async () => {
+    if (!newListing.name || !newListing.age || !newListing.rent || !newListing.accommodationType || !newListing.roomType) {
+      try { window?.alert?.("Please fill out Name, Age, Rent, Accommodation Type and Room Type.") } catch {}
+      return
+    }
     const newId = roommates.length > 0 ? Math.max(...roommates.map((r) => r.id)) + 1 : 1
     const newRoommate = {
       id: newId,
@@ -1449,8 +1492,8 @@ export default function HomePage() {
       compatibilityScore: Math.floor(Math.random() * 40) + 60, // Random compatibility
       isVerified: false, // Default
       rating: 0, // Default
-      profilePicture: "/placeholder.svg?height=64&width=64", // Default
-      photos: ["/placeholder.svg?height=200&width=300"], // Default
+      profilePicture: normalizePhoto({ id: newId }, "/ap1.jpg"),
+      photos: [normalizePhoto({ id: newId }, undefined)],
       bio: newListing.bio,
       dateJoined: new Date().toISOString().split("T")[0],
       lastActive: new Date().toISOString().split("T")[0],
@@ -1462,9 +1505,18 @@ export default function HomePage() {
       interests: newListing.interests.split(",").map((s) => s.trim()),
       reviews: [],
       isFavorite: false,
+      createdAt: serverTimestamp(),
     }
 
-    setRoommates((prev) => [...prev, newRoommate])
+    // Optimistically update UI immediately
+    setRoommates((prev) => [...prev, { ...newRoommate, createdAt: new Date().toISOString() }])
+
+    // Fire-and-forget Firestore write
+    try {
+      void addDoc(collection(db, "roommates"), newRoommate)
+    } catch (e) {
+      console.error("Failed to store listing in Firestore", e)
+    }
     setIsAddDialogOpen(false)
     // Reset form
     setNewListing({
@@ -1678,7 +1730,7 @@ export default function HomePage() {
           }}
           onSelectAnalytics={() => setCurrentPage("analytics")} // Set current page to analytics
         />
-        <div className="flex-1 flex flex-col">
+        <SidebarInset>
           {currentPage === "dashboard" ? (
             <DashboardContent
               roommates={roommates}
@@ -1715,13 +1767,14 @@ export default function HomePage() {
               isDetailModalOpen={isDetailModalOpen}
               selectedRoommate={selectedRoommate}
               setIsDetailModalOpen={setIsDetailModalOpen}
+              setSelectedRoommate={setSelectedRoommate}
             />
           ) : (
             <main className="flex-1 p-6">
               <AnalyticsContent />
             </main>
           )}
-        </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   )

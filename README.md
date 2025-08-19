@@ -1,14 +1,12 @@
-# 🏠 CribHub
+<h1>CribHub<h1>
 
-CribHub is a smart and user-friendly platform that helps students and young professionals easily **find roommates and affordable accommodation**. Whether you’re new to a city or just looking for a better living match, CribHub helps you discover verified listings and compatible flatmates in just a few clicks.
+CribHub is a smart and user-friendly platform that helps students and young professionals easily **find roommates and affordable accommodation**. Whether you’re new to a city or just looking for a better living match
 
 # A Room-mate and Accommodation Finder
 
----
+## Features
 
-## 🚀 Features
-
-- 🧑‍🤝‍🧑 **Roommate Matching** based on preferences, habits, budget & lifestyle.
+- 🧑‍🤝‍🧑 **Roommate Matching**
 - 📍 **Verified Accommodation Listings** (flats, PGs, hostels, shared rooms).
 - 🔍 Advanced **filters for rent, location, gender, occupation**, etc.
 - 💬 In-app **chat** to connect with potential roommates.
@@ -16,27 +14,10 @@ CribHub is a smart and user-friendly platform that helps students and young prof
 
 ---
 
-## 🛠 Tech Stack
-
 - **Frontend:** React / Next.js + TailwindCSS
 - **UI Components:** shadcn/ui + Radix UI
+- **FireBase-Authentication**
 
 ---
 
-## 📦 Installation
-
-```bash
-git clone https://github.com/divyagoyal138/cribhub.git
-cd cribhub
-npm install
-npm run dev
-
-```
-
-## after the project execution
-
 press CRTL+B for the side bar to move
-
-```
-
-```
