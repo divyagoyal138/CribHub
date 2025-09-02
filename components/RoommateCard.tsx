@@ -15,13 +15,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 import { Heart, ShieldCheck, Eye, Edit, Trash2, CalendarDays, Star } from "lucide-react";
 
-interface Review {
-  id: number;
-  reviewer: string;
-  rating: number;
-  comment: string;
-}
-
 interface Roommate {
   id: number;
   name: string;

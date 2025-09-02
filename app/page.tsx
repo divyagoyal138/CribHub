@@ -277,7 +277,9 @@ const viewModes = [
   { id: "compact", label: "Compact", icon: Rows },
   { id: "kanban", label: "Kanban", icon: Kanban },
   { id: "timeline", label: "Timeline", icon: CalendarIcon },
-]
+ ] as const
+
+type ViewMode = typeof viewModes[number]["id"]
 
 function DetailedRoommateModal({ roommate, isOpen, onClose }: { roommate: Roommate | null; isOpen: boolean; onClose: (open: boolean) => void }) {
   if (!roommate) return null
@@ -613,7 +615,7 @@ function RoommateCard({
   onToggleFavorite,
 }: {
   roommate: Roommate
-  viewMode: "grid" | "list" | "compact" | "kanban" | "timeline"
+  viewMode: ViewMode
   isSelected: boolean
   onSelect: (checked: boolean) => void
   onEdit: (roommate: Roommate) => void
@@ -1108,8 +1110,8 @@ function DashboardContent({
   setSelectedGender: React.Dispatch<React.SetStateAction<string>>
   sortBy: string
   setSortBy: React.Dispatch<React.SetStateAction<string>>
-  viewMode: "grid" | "list" | "compact" | "kanban" | "timeline"
-  setViewMode: React.Dispatch<React.SetStateAction<"grid" | "list" | "compact" | "kanban" | "timeline">>
+  viewMode: ViewMode
+  setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>
   selectedRoommates: number[]
   handleSelectRoommate: (roommateId: number, checked: boolean) => void
   handleSelectAll: (checked: boolean) => void
@@ -1520,7 +1522,7 @@ export default function HomePage() {
   const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("All")
   const [selectedGender, setSelectedGender] = useState("All")
   const [sortBy, setSortBy] = useState("compatibilityScore")
-  const [viewMode, setViewMode] = useState("grid")
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [selectedRoommates, setSelectedRoommates] = useState<number[]>([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedRoommate, setSelectedRoommate] = useState<Roommate | null>(null)
@@ -1751,7 +1753,7 @@ export default function HomePage() {
           acc[type] = filteredRoommates.filter((r) => r.accommodationType === type)
           return acc
         },
-        {} as Record<string, any[]>,
+        {} as Record<string, Roommate[]>,
       )
 
       return (
