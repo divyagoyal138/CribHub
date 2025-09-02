@@ -15,9 +15,34 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 import { Heart, ShieldCheck, Eye, Edit, Trash2, CalendarDays, Star } from "lucide-react";
 
+interface Review {
+  id: number;
+  reviewer: string;
+  rating: number;
+  comment: string;
+}
+
+interface Roommate {
+  id: number;
+  name: string;
+  age: number;
+  gender: string;
+  occupation: string;
+  location: string;
+  accommodationType: string;
+  roomType: string;
+  rent: number;
+  availability: string;
+  compatibilityScore: number;
+  isVerified: boolean;
+  rating: number;
+  profilePicture?: string;
+  photos?: string[];
+  bio: string;
+}
+
 interface RoommateCardProps {
-  roommate: any; // You can use Doc<"roommates"> for type safety
-  viewMode: string;
+  roommate: Roommate;
   isSelected: boolean;
   onSelect: () => void;
   onEdit: () => void;
@@ -28,7 +53,6 @@ interface RoommateCardProps {
 
 export default function RoommateCard({
   roommate,
-  viewMode,
   isSelected,
   onSelect,
   onEdit,

@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 
@@ -19,8 +18,9 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await signInWithEmailAndPassword(auth, email, password)
-    } catch (e: any) {
-      setError(e?.message ?? "Failed to sign in")
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to sign in"
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -31,8 +31,9 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await createUserWithEmailAndPassword(auth, email, password)
-    } catch (e: any) {
-      setError(e?.message ?? "Failed to sign up")
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Failed to sign up"
+      setError(message)
     } finally {
       setLoading(false)
     }

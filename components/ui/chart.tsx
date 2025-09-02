@@ -6,6 +6,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { TooltipProps } from "recharts"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import {
   NameType,
   ValueType,
@@ -69,7 +70,6 @@ function ChartTooltip({ ...props }: TooltipProps<ValueType, NameType>) {
 
 function ChartTooltipContent({
   className,
-  viewBox,
   active,
   payload,
   label,
@@ -81,11 +81,11 @@ function ChartTooltipContent({
     hideLabel?: boolean
     hideIndicator?: boolean
   }) {
+  const chartConfig = React.useContext(ChartContext)
+
   if (!active || !payload || payload.length === 0) {
     return null
   }
-
-  const chartConfig = React.useContext(ChartContext)
 
   return (
     <TooltipPrimitive.Content

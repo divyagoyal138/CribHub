@@ -18,7 +18,7 @@ import {
   Legend,
 } from "recharts"
 import { Users, TrendingUp, Sparkles, Star } from 'lucide-react'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
 
 // Mock data for analytics
 const analyticsData = [

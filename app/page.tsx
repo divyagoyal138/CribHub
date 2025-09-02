@@ -48,6 +48,62 @@ import {
 } from "@/components/ui/sidebar"
 import { AnalyticsContent } from "@/components/analytics-content" // Import the new AnalyticsContent
 
+// Types
+interface Review {
+  id: number
+  reviewer: string
+  rating: number
+  comment: string
+}
+
+interface BudgetRange {
+  min: number
+  max: number
+}
+
+interface SocialMediaLinks {
+  linkedin?: string
+  instagram?: string
+}
+
+interface LifestylePreferences {
+  cleanliness: string
+  socialHabits: string
+  noiseLevel: string
+  pets: string
+  smoking: string
+}
+
+interface Roommate {
+  id: number
+  name: string
+  age: number
+  gender: string
+  occupation: string
+  location: string
+  accommodationType: string
+  roomType: string
+  rent: number
+  availability: string
+  lifestyle: LifestylePreferences
+  compatibilityScore: number
+  isVerified: boolean
+  rating: number
+  profilePicture: string
+  photos: string[]
+  bio: string
+  dateJoined: string
+  lastActive: string
+  preferredMoveInDate: string
+  minLeaseDuration: string
+  budget: BudgetRange
+  contactPreference: string
+  socialMedia: SocialMediaLinks
+  interests: string[]
+  reviews: Review[]
+  isFavorite: boolean
+}
+
 
 // Mock data for roommates
 const initialRoommates = [
@@ -207,7 +263,7 @@ const initialRoommates = [
 const accommodationTypes = ["All", "Apartment", "House", "Studio", "Shared Room"]
 const defaultPhotos = ["/ap1.jpg", "/ap2.jpg", "/ap3.jpg", "/ap4.jpg"]
 const getDefaultPhotoForId = (id: number) => defaultPhotos[Math.abs(id) % defaultPhotos.length]
-const normalizePhoto = (roommate: any, src?: string) => {
+const normalizePhoto = (roommate: Pick<Roommate, "id">, src?: string) => {
   if (!src || src.includes("placeholder.svg")) return getDefaultPhotoForId(Number(roommate?.id ?? 0))
   return src
 }
@@ -223,7 +279,7 @@ const viewModes = [
   { id: "timeline", label: "Timeline", icon: CalendarIcon },
 ]
 
-function DetailedRoommateModal({ roommate, isOpen, onClose }: any) {
+function DetailedRoommateModal({ roommate, isOpen, onClose }: { roommate: Roommate | null; isOpen: boolean; onClose: (open: boolean) => void }) {
   if (!roommate) return null
 
   const compatibilityColors = {
@@ -521,7 +577,7 @@ function DetailedRoommateModal({ roommate, isOpen, onClose }: any) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {roommate.reviews.length > 0 ? (
-                  roommate.reviews.map((review: any) => (
+                  roommate.reviews.map((review: Review) => (
                     <div key={review.id} className="border-b pb-3 last:border-b-0 last:pb-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium">{review.reviewer}</span>
@@ -555,7 +611,16 @@ function RoommateCard({
   onDelete,
   onViewDetails,
   onToggleFavorite,
-}: any) {
+}: {
+  roommate: Roommate
+  viewMode: "grid" | "list" | "compact" | "kanban" | "timeline"
+  isSelected: boolean
+  onSelect: (checked: boolean) => void
+  onEdit: (roommate: Roommate) => void
+  onDelete: (id: number) => void
+  onViewDetails: (roommate: Roommate) => void
+  onToggleFavorite: (id: number) => void
+}) {
   const compatibilityColors = {
     high: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
     medium: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -875,7 +940,7 @@ function RoommateCard({
   )
 }
 
-function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectAnalytics }: any) {
+function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectAnalytics }: { roommates: Roommate[]; onSelectFavorites: () => void; onSelectDashboard: () => void; onSelectAnalytics: () => void }) {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -911,7 +976,7 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectA
                   <Star className="h-4 w-4" />
                   <span>Favorites</span>
                   <Badge variant="secondary" className="ml-auto">
-                    {roommates.filter((r: any) => r.isFavorite).length}
+                    {roommates.filter((r) => r.isFavorite).length}
                   </Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -939,7 +1004,7 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectA
                   <CheckCircle className="h-4 w-4" />
                   <span>Verified Only</span>
                   <Badge variant="secondary" className="ml-auto">
-                    {roommates.filter((r: any) => r.isVerified).length}
+                    {roommates.filter((r) => r.isVerified).length}
                   </Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -957,7 +1022,7 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectA
                   <PawPrint className="h-4 w-4" />
                   <span>Pet Friendly</span>
                   <Badge variant="secondary" className="ml-auto">
-                    {roommates.filter((r: any) => r.lifestyle.pets !== "No Pets").length}
+                    {roommates.filter((r) => r.lifestyle.pets !== "No Pets").length}
                   </Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -979,7 +1044,7 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectA
             <div className="flex justify-between">
               <span className="text-white">Avg. Compatibility</span>
               <span className="text-white">
-                {(roommates.reduce((sum: number, r: any) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(
+                {(roommates.reduce((sum: number, r: Roommate) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(
                   0,
                 )}
                 %
@@ -1029,7 +1094,55 @@ function DashboardContent({
   selectedRoommate,
   setIsDetailModalOpen,
   setSelectedRoommate,
-}: any) {
+}: {
+  roommates: Roommate[]
+  searchQuery: string
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>
+  selectedAccommodationType: string
+  setSelectedAccommodationType: React.Dispatch<React.SetStateAction<string>>
+  selectedRentRange: string
+  setSelectedRentRange: React.Dispatch<React.SetStateAction<string>>
+  selectedVerificationStatus: string
+  setSelectedVerificationStatus: React.Dispatch<React.SetStateAction<string>>
+  selectedGender: string
+  setSelectedGender: React.Dispatch<React.SetStateAction<string>>
+  sortBy: string
+  setSortBy: React.Dispatch<React.SetStateAction<string>>
+  viewMode: "grid" | "list" | "compact" | "kanban" | "timeline"
+  setViewMode: React.Dispatch<React.SetStateAction<"grid" | "list" | "compact" | "kanban" | "timeline">>
+  selectedRoommates: number[]
+  handleSelectRoommate: (roommateId: number, checked: boolean) => void
+  handleSelectAll: (checked: boolean) => void
+  handleBulkDelete: () => void
+  handleEdit: (roommate: Roommate) => void
+  handleDelete: (roommateId: number) => void
+  handleViewDetails: (roommate: Roommate) => void
+  handleToggleFavorite: (roommateId: number) => void
+  isAddDialogOpen: boolean
+  setIsAddDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+  newListing: {
+    name: string
+    age: string
+    gender: string
+    occupation: string
+    location: string
+    accommodationType: string
+    roomType: string
+    rent: string
+    availability: string
+    bio: string
+    interests: string
+  }
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+  handleSelectChange: (id: string, value: string) => void
+  handleAddListing: () => Promise<void> | void
+  filteredRoommates: Roommate[]
+  renderRoommates: () => React.ReactNode
+  isDetailModalOpen: boolean
+  selectedRoommate: Roommate | null
+  setIsDetailModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setSelectedRoommate: React.Dispatch<React.SetStateAction<Roommate | null>>
+}) {
   return (
     <>
       {/* Header */}
@@ -1315,7 +1428,7 @@ function DashboardContent({
                   <div>
                     <p className="text-sm font-medium text-primary">Avg. Compatibility</p>
                     <p className="text-2xl font-bold text-primary">
-                      {(roommates.reduce((sum: number, r: any) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(0)}%
+                      {(roommates.reduce((sum: number, r: Roommate) => sum + r.compatibilityScore, 0) / roommates.length).toFixed(0)}%
                     </p>
                   </div>
                 </div>
@@ -1329,7 +1442,7 @@ function DashboardContent({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-primary">Favorites</p>
-                    <p className="text-2xl font-bold text-primary">{roommates.filter((r: any) => r.isFavorite).length}</p>
+                    <p className="text-2xl font-bold text-primary">{roommates.filter((r) => r.isFavorite).length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1410,7 +1523,7 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState("grid")
   const [selectedRoommates, setSelectedRoommates] = useState<number[]>([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [selectedRoommate, setSelectedRoommate] = useState<any>(null)
+  const [selectedRoommate, setSelectedRoommate] = useState<Roommate | null>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState("dashboard") // New state for current page
@@ -1616,7 +1729,7 @@ export default function HomePage() {
     console.log("Bulk delete roommates:", selectedRoommates)
   }
 
-  const handleEdit = (roommate: any) => {
+  const handleEdit = (roommate: Roommate) => {
     console.log("Edit roommate:", roommate)
     // In a real app, you'd open an edit form pre-filled with roommate data
   }
@@ -1626,7 +1739,7 @@ export default function HomePage() {
     console.log("Delete roommate:", roommateId)
   }
 
-  const handleViewDetails = (roommate: any) => {
+  const handleViewDetails = (roommate: Roommate) => {
     setSelectedRoommate(roommate)
     setIsDetailModalOpen(true)
   }
