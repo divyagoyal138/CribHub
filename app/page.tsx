@@ -1154,7 +1154,7 @@ function DashboardContent({
             <div className="flex items-center space-x-2">
               <Select value={selectedAccommodationType} onValueChange={setSelectedAccommodationType}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by type" />
+                  <SelectValue placeholder="All accommodation types" />
                 </SelectTrigger>
                 <SelectContent>
                   {accommodationTypes.map((type) => (
@@ -1166,7 +1166,7 @@ function DashboardContent({
               </Select>
               <Select value={selectedRentRange} onValueChange={setSelectedRentRange}>
                 <SelectTrigger className="w-36">
-                  <SelectValue placeholder="Filter by rent" />
+                  <SelectValue placeholder="All rent ranges" />
                 </SelectTrigger>
                 <SelectContent>
                   {rentRanges.map((range) => (
@@ -1178,7 +1178,7 @@ function DashboardContent({
               </Select>
               <Select value={selectedGender} onValueChange={setSelectedGender}>
                 <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Filter by gender" />
+                  <SelectValue placeholder="All genders" />
                 </SelectTrigger>
                 <SelectContent>
                   {genders.map((gender) => (
@@ -1190,7 +1190,7 @@ function DashboardContent({
               </Select>
               <Select value={selectedVerificationStatus} onValueChange={setSelectedVerificationStatus}>
                 <SelectTrigger className="w-36">
-                  <SelectValue placeholder="Filter by status" />
+                  <SelectValue placeholder="All verification statuses" />
                 </SelectTrigger>
                 <SelectContent>
                   {verificationStatuses.map((status) => (
@@ -1202,7 +1202,7 @@ function DashboardContent({
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Sort results" />
+                  <SelectValue placeholder="Sort by compatibility" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="compatibilityScore">Compatibility</SelectItem>
@@ -1247,7 +1247,7 @@ function DashboardContent({
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="name">Name</Label>
-                    <Input id="name" value={newListing.name} onChange={handleInputChange} placeholder="Your Name" />
+                    <Input id="name" value={newListing.name} onChange={handleInputChange} placeholder="Enter your full name" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1257,14 +1257,14 @@ function DashboardContent({
                         type="number"
                         value={newListing.age}
                         onChange={handleInputChange}
-                        placeholder="e.g., 25"
+                        placeholder="Enter your age (e.g., 25)"
                       />
                     </div>
                     <div>
                       <Label htmlFor="gender">Gender</Label>
                       <Select value={newListing.gender} onValueChange={(val) => handleSelectChange("gender", val)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Gender" />
+                          <SelectValue placeholder="Choose your gender" />
                         </SelectTrigger>
                         <SelectContent>
                           {genders.slice(1).map((gender) => (
@@ -1282,7 +1282,7 @@ function DashboardContent({
                       id="occupation"
                       value={newListing.occupation}
                       onChange={handleInputChange}
-                      placeholder="e.g., Software Engineer"
+                      placeholder="Enter your job title (e.g., Software Engineer)"
                     />
                   </div>
                   <div>
@@ -1291,7 +1291,7 @@ function DashboardContent({
                       id="location"
                       value={newListing.location}
                       onChange={handleInputChange}
-                      placeholder="e.g., San Francisco, CA"
+                      placeholder="Enter city and state (e.g., San Francisco, CA)"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -1302,7 +1302,7 @@ function DashboardContent({
                         onValueChange={(val) => handleSelectChange("accommodationType", val)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Type" />
+                          <SelectValue placeholder="Choose accommodation type" />
                         </SelectTrigger>
                         <SelectContent>
                           {accommodationTypes.slice(1).map((type) => (
@@ -1320,7 +1320,7 @@ function DashboardContent({
                         onValueChange={(val) => handleSelectChange("roomType", val)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Room Type" />
+                          <SelectValue placeholder="Choose room type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Private Room">Private Room</SelectItem>
@@ -1337,7 +1337,7 @@ function DashboardContent({
                       type="number"
                       value={newListing.rent}
                       onChange={handleInputChange}
-                      placeholder="e.g., 1200"
+                      placeholder="Enter monthly rent amount (e.g., 1200)"
                     />
                   </div>
                   <div>
@@ -1347,6 +1347,7 @@ function DashboardContent({
                       type="date"
                       value={newListing.availability}
                       onChange={handleInputChange}
+                      placeholder="Select move-in date"
                     />
                   </div>
                   <div>
@@ -1355,7 +1356,7 @@ function DashboardContent({
                       id="bio"
                       value={newListing.bio}
                       onChange={handleInputChange}
-                      placeholder="Tell us about yourself and what you're looking for..."
+                      placeholder="Describe yourself, your lifestyle, and what you're looking for in a roommate..."
                     />
                   </div>
                   <div>
@@ -1364,7 +1365,7 @@ function DashboardContent({
                       id="interests"
                       value={newListing.interests}
                       onChange={handleInputChange}
-                      placeholder="e.g., hiking, cooking, gaming"
+                      placeholder="List your hobbies and interests (e.g., hiking, cooking, gaming)"
                     />
                   </div>
                 </div>
