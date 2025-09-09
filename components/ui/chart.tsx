@@ -50,7 +50,23 @@ function ChartTooltip(props: TooltipProps<ValueType, NameType>) {
   return <ChartTooltipContent {...props} />
 }
 
-function ChartTooltipContent(props: any) {
+type TooltipItem = {
+  name?: string | number
+  value?: string | number
+  color?: string
+  dataKey?: string | number
+}
+
+type ChartTooltipContentProps = {
+  active?: boolean
+  payload?: TooltipItem[]
+  label?: string | number
+  hideLabel?: boolean
+  hideIndicator?: boolean
+  className?: string
+}
+
+function ChartTooltipContent(props: ChartTooltipContentProps) {
   const { active, payload, label, hideLabel = false, hideIndicator = false, className } = props
   const chartConfig = React.useContext(ChartContext)
 
@@ -69,7 +85,7 @@ function ChartTooltipContent(props: any) {
         <div className="mb-1 text-sm font-medium">{label}</div>
       ) : null}
       <div className="grid gap-1.5">
-        {payload.map((item: any, i: number) => {
+        {payload.map((item: TooltipItem, i: number) => {
           const { name, value, color } = item
           if (!chartConfig?.config[name as string]) {
             return null
