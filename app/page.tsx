@@ -1077,13 +1077,8 @@ function DashboardContent({
   viewMode,
   setViewMode,
   selectedRoommates,
-  handleSelectRoommate,
   handleSelectAll,
   handleBulkDelete,
-  handleEdit,
-  handleDelete,
-  handleViewDetails,
-  handleToggleFavorite,
   isAddDialogOpen,
   setIsAddDialogOpen,
   newListing,
@@ -1113,13 +1108,8 @@ function DashboardContent({
   viewMode: ViewMode
   setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>
   selectedRoommates: number[]
-  handleSelectRoommate: (roommateId: number, checked: boolean) => void
   handleSelectAll: (checked: boolean) => void
   handleBulkDelete: () => void
-  handleEdit: (roommate: Roommate) => void
-  handleDelete: (roommateId: number) => void
-  handleViewDetails: (roommate: Roommate) => void
-  handleToggleFavorite: (roommateId: number) => void
   isAddDialogOpen: boolean
   setIsAddDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
   newListing: {
@@ -1864,13 +1854,8 @@ export default function HomePage() {
               viewMode={viewMode}
               setViewMode={setViewMode}
               selectedRoommates={selectedRoommates}
-              handleSelectRoommate={handleSelectRoommate}
               handleSelectAll={handleSelectAll}
               handleBulkDelete={handleBulkDelete}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-              handleViewDetails={handleViewDetails}
-              handleToggleFavorite={handleToggleFavorite}
               isAddDialogOpen={isAddDialogOpen}
               setIsAddDialogOpen={setIsAddDialogOpen}
               newListing={newListing}

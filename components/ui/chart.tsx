@@ -48,21 +48,11 @@ function ChartContainer({
 }
 
 function ChartTooltip({ ...props }: TooltipProps<ValueType, NameType>) {
-  const chartConfig = React.useContext(ChartContext)
-
   return (
     <ChartTooltipContent
       hideLabel
       hideIndicator
       {...props}
-      formatter={(value, name) => {
-        const config = chartConfig?.config[name as string]
-        return (
-          <span style={{ color: config?.color }}>
-            {config?.label || name}: {value}
-          </span>
-        )
-      }}
       className="grid gap-1.5 px-2 py-1 text-xs"
     />
   )
