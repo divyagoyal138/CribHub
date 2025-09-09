@@ -6,7 +6,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { TooltipProps } from "recharts"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import {
   NameType,
   ValueType,
@@ -51,18 +50,8 @@ function ChartTooltip(props: TooltipProps<ValueType, NameType>) {
   return <ChartTooltipContent {...props} />
 }
 
-function ChartTooltipContent({
-  active,
-  payload,
-  label,
-  hideLabel = false,
-  hideIndicator = false,
-  className,
-}: TooltipProps<ValueType, NameType> & {
-  hideLabel?: boolean
-  hideIndicator?: boolean
-  className?: string
-}) {
+function ChartTooltipContent(props: any) {
+  const { active, payload, label, hideLabel = false, hideIndicator = false, className } = props
   const chartConfig = React.useContext(ChartContext)
 
   if (!active || !payload || payload.length === 0) {
@@ -80,7 +69,7 @@ function ChartTooltipContent({
         <div className="mb-1 text-sm font-medium">{label}</div>
       ) : null}
       <div className="grid gap-1.5">
-        {payload.map((item, i) => {
+        {payload.map((item: any, i: number) => {
           const { name, value, color } = item
           if (!chartConfig?.config[name as string]) {
             return null

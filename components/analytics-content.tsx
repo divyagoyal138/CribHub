@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Legend } from "recharts"
 import { Users, TrendingUp, Sparkles, Star } from 'lucide-react'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 
 // Mock data for analytics
 const analyticsData = [
