@@ -32,6 +32,7 @@ interface Roommate {
   profilePicture?: string;
   photos?: string[];
   bio: string;
+  isFavorite: boolean;
 }
 
 interface RoommateCardProps {
