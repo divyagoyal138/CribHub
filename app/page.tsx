@@ -1015,7 +1015,7 @@ function AppSidebar({ roommates, onSelectFavorites, onSelectDashboard, onSelectA
                   <DollarSign className="h-4 w-4" />
                   <span>Under $1000</span>
                   <Badge variant="secondary" className="ml-auto">
-                    {roommates.filter((r: any) => r.rent <= 1000).length}
+                    {roommates.filter((r: Roommate) => r.rent <= 1000).length}
                   </Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>

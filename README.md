@@ -20,4 +20,4 @@ CribHub is a smart and user-friendly platform that helps students and young prof
 
 ---
 
-press CRTL+B for the side bar to move
+press CRTL+B for the side bar to move   
