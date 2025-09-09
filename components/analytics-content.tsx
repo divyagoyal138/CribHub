@@ -121,7 +121,7 @@ export function AnalyticsContent() { // Changed to named export
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip />
                 <Legend />
                 <Bar dataKey="listings" fill="var(--color-listings)" name="Total Listings" />
                 <Bar dataKey="new" fill="var(--color-new)" name="New Listings" />

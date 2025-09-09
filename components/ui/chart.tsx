@@ -47,30 +47,22 @@ function ChartContainer({
   )
 }
 
-function ChartTooltip({ ...props }: TooltipProps<ValueType, NameType>) {
-  return (
-    <ChartTooltipContent
-      hideLabel
-      hideIndicator
-      {...props}
-      className="grid gap-1.5 px-2 py-1 text-xs"
-    />
-  )
+function ChartTooltip(props: TooltipProps<ValueType, NameType>) {
+  return <ChartTooltipContent {...props} />
 }
 
 function ChartTooltipContent({
-  className,
   active,
   payload,
   label,
   hideLabel = false,
   hideIndicator = false,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content> &
-  TooltipProps<ValueType, NameType> & {
-    hideLabel?: boolean
-    hideIndicator?: boolean
-  }) {
+  className,
+}: TooltipProps<ValueType, NameType> & {
+  hideLabel?: boolean
+  hideIndicator?: boolean
+  className?: string
+}) {
   const chartConfig = React.useContext(ChartContext)
 
   if (!active || !payload || payload.length === 0) {
@@ -78,12 +70,11 @@ function ChartTooltipContent({
   }
 
   return (
-    <TooltipPrimitive.Content
+    <div
       className={cn(
         "rounded-md border bg-popover p-2 text-popover-foreground shadow-md",
         className
       )}
-      {...props}
     >
       {!hideLabel && label ? (
         <div className="mb-1 text-sm font-medium">{label}</div>
@@ -119,7 +110,7 @@ function ChartTooltipContent({
           )
         })}
       </div>
-    </TooltipPrimitive.Content>
+    </div>
   )
 }
 
